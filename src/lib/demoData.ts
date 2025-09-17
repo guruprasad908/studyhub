@@ -86,8 +86,3 @@ export const demoWeeklySummary = {
     { name: 'Database', value: 2.5 }
   ]
 }
-
-export const isDemoMode = () => {
-  return process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder') || 
-         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.includes('placeholder')
-}

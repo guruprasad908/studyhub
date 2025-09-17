@@ -5,7 +5,21 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { demoRoadmapItems, isDemoMode } from '../../lib/demoData'
+import { 
+  Target, 
+  Plus, 
+  Calendar, 
+  Clock, 
+  CheckCircle, 
+  Circle,
+  TrendingUp,
+  BookOpen,
+  Star,
+  Filter,
+  Search,
+  Edit2,
+  Trash2
+} from 'lucide-react'
 import AIRoadmapGenerator from '../../components/AIRoadmapGenerator'
 
 interface RoadmapItem {
@@ -16,37 +30,54 @@ interface RoadmapItem {
   completed_hours: number
   created_at: string
   status: 'active' | 'completed' | 'paused'
+  category?: string
+  priority?: 'high' | 'medium' | 'low'
+  deadline?: string
 }
 
 export default function RoadmapPage() {
   const [user, setUser] = useState<any>(null)
   const [roadmapItems, setRoadmapItems] = useState<RoadmapItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [newItem, setNewItem] = useState({ title: '', description: '', target_hours: 20 })
+  const [newItem, setNewItem] = useState({ 
+    title: '', 
+    description: '', 
+    target_hours: 20,
+    category: 'General',
+    priority: 'medium' as 'high' | 'medium' | 'low',
+    deadline: ''
+  })
   const [showAddForm, setShowAddForm] = useState(false)
-  const [viewMode, setViewMode] = useState<'manual' | 'ai'>('manual') // New state for view mode
+  const [viewMode, setViewMode] = useState<'manual' | 'ai'>('manual')
+  const [filterCategory, setFilterCategory] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState<'created' | 'priority' | 'progress' | 'deadline'>('created')
   const router = useRouter()
+
+  const categories = ['General', 'Programming', 'Data Science', 'Web Development', 'Design', 'Business', 'Language']
+  const priorities = [
+    { value: 'high', label: 'High Priority', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
+    { value: 'medium', label: 'Medium Priority', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
+    { value: 'low', label: 'Low Priority', color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' }
+  ]
 
   useEffect(() => {
     checkUser()
   }, [])
 
   const checkUser = async () => {
-    if (isDemoMode()) {
-      // Use demo data in demo mode
-      setUser({ email: 'demo@studyhub.com' } as any)
-      setRoadmapItems(demoRoadmapItems)
-      setLoading(false)
-      return
-    }
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/auth')
+        return
+      }
+      setUser(user)
+      await fetchRoadmapItems(user.id)
+    } catch (error) {
+      console.error('Error checking user:', error)
       router.push('/auth')
-      return
     }
-    setUser(user)
-    fetchRoadmapItems(user.id)
   }
 
   const fetchRoadmapItems = async (userId: string) => {
@@ -70,24 +101,6 @@ export default function RoadmapPage() {
     e.preventDefault()
     if (!user || !newItem.title.trim()) return
 
-    if (isDemoMode()) {
-      // Demo mode: add item locally only
-      const demoItem = {
-        id: `demo-${Date.now()}`,
-        title: newItem.title.trim(),
-        description: newItem.description.trim(),
-        target_hours: newItem.target_hours,
-        completed_hours: 0,
-        status: 'active' as const,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-      setRoadmapItems([demoItem, ...roadmapItems])
-      setNewItem({ title: '', description: '', target_hours: 20 })
-      setShowAddForm(false)
-      return
-    }
-
     try {
       const { data, error } = await supabase
         .from('roadmap_items')
@@ -105,7 +118,14 @@ export default function RoadmapPage() {
       if (error) throw error
       
       setRoadmapItems([data, ...roadmapItems])
-      setNewItem({ title: '', description: '', target_hours: 20 })
+      setNewItem({ 
+        title: '', 
+        description: '', 
+        target_hours: 20,
+        category: 'General',
+        priority: 'medium',
+        deadline: ''
+      })
       setShowAddForm(false)
     } catch (error) {
       console.error('Error adding roadmap item:', error)

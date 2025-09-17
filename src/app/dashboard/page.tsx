@@ -42,7 +42,19 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
       if (!user) { router.push('/auth'); return }
-      await Promise.all([fetchItems(user.id), fetchWeeklySummary(user.id)])
+      
+      // Handle each promise individually to prevent unhandled rejections
+      try {
+        await fetchItems(user.id)
+      } catch (error) {
+        console.error('Error fetching items:', error)
+      }
+      
+      try {
+        await fetchWeeklySummary(user.id)
+      } catch (error) {
+        console.error('Error fetching weekly summary:', error)
+      }
     } catch (error) {
       console.error('Error checking user:', error)
       router.push('/auth')

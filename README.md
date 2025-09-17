@@ -2,22 +2,27 @@
 
 **Beat procrastination and achieve your study goals with our beautifully designed, completely free study platform.**
 
+> **Latest Update**: Fixed critical unhandled promise rejections and enhanced stability for production deployment.
+
 ![StudyHub](https://img.shields.io/badge/StudyHub-Free%20Forever-brightgreen)
 ![Next.js](https://img.shields.io/badge/Next.js-15.5.3-black)
 ![React](https://img.shields.io/badge/React-19.1.0-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Supabase](https://img.shields.io/badge/Supabase-2.57.4-green)
+![Node.js](https://img.shields.io/badge/Node.js-18+-green)
 
 ## ✨ Features
 
-### 🎯 **Three Clean Study Environments**
+### 🎯 **Four Clean Study Environments**
 - **🏠 Home Dashboard**: Clean navigation between all study tools
 - **⚡ Today's Focus**: Anti-procrastination daily task management
 - **📋 Study Roadmap**: Long-term goal planning and tracking
 - **📊 Analytics Dashboard**: Progress visualization and insights
+- **🤖 AI Study Buddy**: Intelligent chatbot for study assistance
 
 ### 🍅 **Anti-Procrastination Tools**
 - **Pomodoro Timer**: 25-minute focused work sessions
+- **Smart Pomodoro AI Coach**: AI-powered focus optimization
 - **Task Breakdown**: Break large goals into manageable chunks
 - **Daily Motivation**: Inspirational quotes and focus tips
 - **Progress Tracking**: Visual progress bars to maintain motivation
@@ -28,6 +33,7 @@
 - **Subject Distribution**: See time allocation across different topics
 - **Consistency Tracking**: Monitor your study consistency percentage
 - **Goal Progress**: Track completion rates for all study goals
+- **AI Progress Insights**: Intelligent analysis of your study patterns
 
 ### 🎨 **Beautiful Design**
 - **Glass-morphism UI**: Modern, professional interface
@@ -111,6 +117,7 @@ prep-hub/
 - **Tailwind CSS 3.4.15** - Styling framework
 - **Lucide React** - Beautiful icons
 - **Recharts 3.2.0** - Data visualization
+- **Framer Motion** - Smooth animations
 
 ### Backend
 - **Supabase** - PostgreSQL database with real-time features
@@ -121,6 +128,7 @@ prep-hub/
 - **ESLint 9** - Code linting
 - **PostCSS** - CSS processing
 - **Turbopack** - Fast development builds
+- **Vercel** - Deployment platform
 
 ## 📱 Pages Overview
 
@@ -156,6 +164,17 @@ prep-hub/
 - Magic link support
 - Secure user session management
 
+## 🛠️ Recent Improvements & Fixes
+
+### Stability Enhancements
+- **Fixed Unhandled Promise Rejections**: Resolved critical stability issues that were causing application crashes
+- **Improved Error Handling**: Added comprehensive error handling throughout the application
+- **Enhanced Authentication**: Fixed session management and improved login reliability
+
+### Performance Improvements
+- **Optimized Data Fetching**: Improved loading states and error recovery
+- **Better Resource Management**: Enhanced cleanup of subscriptions and event listeners
+
 ## 🌟 Key Features in Detail
 
 ### Anti-Procrastination System
@@ -186,18 +205,57 @@ prep-hub/
 
 ## 🚀 Deployment
 
+### Prerequisites for Deployment
+- Node.js 18 or higher
+- A Supabase account with configured database
+- Environment variables properly set
+
 ### Vercel (Recommended)
+1. Push your code to a GitHub repository
+2. Sign up/in to [Vercel](https://vercel.com)
+3. Click "New Project"
+4. Import your GitHub repository
+5. Configure the project:
+   - Framework: Next.js
+   - Build Command: `npm run build`
+   - Output Directory: `.next`
+6. Add environment variables in the Vercel dashboard
+7. Deploy!
+
+### Netlify
+1. Push your code to a GitHub repository
+2. Sign up/in to [Netlify](https://netlify.com)
+3. Click "New site from Git"
+4. Connect to your GitHub repository
+5. Configure build settings:
+   - Build command: `npm run build`
+   - Publish directory: `.next`
+6. Add environment variables in the Netlify dashboard
+7. Deploy!
+
+### Manual Deployment
+For deploying to your own server:
 ```bash
+# Clone the repository
+git clone <your-repo-url>
+cd prep-hub
+
+# Install dependencies
+npm install
+
+# Build the application
 npm run build
-# Deploy to Vercel
+
+# Start the production server
+npm start
 ```
 
-### Other Platforms
-The app can be deployed to any platform that supports Node.js:
-- Netlify
-- Railway
-- Heroku
-- Self-hosted
+### Environment Variables
+Make sure your production environment contains:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
 ## 🤝 Contributing
 

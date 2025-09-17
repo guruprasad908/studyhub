@@ -40,6 +40,8 @@ export default function DashboardClient() {
       const u = r.data.user
       if (mounted) setUser(u)
       if (u) fullReload(u.id)
+    }).catch(error => {
+      console.error('Error getting user:', error)
     })
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       const u = session?.user ?? null
@@ -61,8 +63,17 @@ export default function DashboardClient() {
   // ---------- fetch & helpers ----------
 
   async function fullReload(userId) {
-    await fetchItems(userId)
-    await fetchWeeklySummary(userId)
+    try {
+      await fetchItems(userId)
+    } catch (error) {
+      console.error('Error in fetchItems:', error)
+    }
+    
+    try {
+      await fetchWeeklySummary(userId)
+    } catch (error) {
+      console.error('Error in fetchWeeklySummary:', error)
+    }
   }
 
   // fetchWeeklySummary builds hoursByDay and hoursByTask for charts

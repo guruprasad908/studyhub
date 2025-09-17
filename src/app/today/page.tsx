@@ -52,7 +52,7 @@ export default function TodayPage() {
     title: '', 
     description: '', 
     estimated_minutes: 25, 
-    priority: 'medium' as const 
+    priority: 'medium' as 'high' | 'medium' | 'low'
   })
   const [showAddTask, setShowAddTask] = useState(false)
   
@@ -155,25 +155,42 @@ export default function TodayPage() {
 
   const addTask = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newTask.title.trim()) return
+    if (!newTask.title.trim() || !user) {
+      console.error('Cannot add task: missing title or user')
+      return
+    }
 
     try {
+      console.log('Adding task:', { newTask, userId: user.id }) // Debug log
+      
+      const taskData = {
+        title: newTask.title.trim(),
+        description: newTask.description.trim() || null,
+        estimated_minutes: newTask.estimated_minutes || 25,
+        priority: newTask.priority || 'medium',
+        user_id: user.id,
+        completed: false
+      }
+      
       const { data, error } = await supabase
         .from('today_tasks')
-        .insert([{
-          ...newTask,
-          user_id: user?.id,
-          completed: false
-        }])
+        .insert([taskData])
         .select()
+        .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
       
-      setTasks(prev => [data[0], ...prev])
+      console.log('Task added successfully:', data) // Debug log
+      setTasks(prev => [data, ...prev])
       setNewTask({ title: '', description: '', estimated_minutes: 25, priority: 'medium' })
       setShowAddTask(false)
     } catch (error) {
       console.error('Error adding task:', error)
+      // Show user-friendly error
+      alert('Failed to add task. Please try again.')
     }
   }
 
@@ -241,103 +258,167 @@ export default function TodayPage() {
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      <div className="absolute top-20 left-20 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse-soft"></div>
-      <div className="absolute bottom-20 right-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse-soft" style={{animationDelay: '1s'}}></div>
-      
-      <div className="max-w-7xl mx-auto relative z-10">
-        {/* Enhanced Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/')}
-              className="p-3 glass-button hover:bg-white/20 rounded-xl transition-all group"
-            >
-              <Home className="w-6 h-6 text-white group-hover:text-blue-300" />
-            </button>
+    <div className="min-h-screen bg-black p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+              <Clock className="w-6 h-6 text-white" />
+            </div>
             <div>
-              <h1 className="text-4xl font-bold gradient-text">Today's Focus</h1>
-              <p className="text-slate-300 text-lg">Stay focused, beat procrastination, achieve your goals</p>
+              <h1 className="text-3xl font-bold text-white">Today's Focus</h1>
+              <p className="text-gray-400">Stay focused, beat procrastination, achieve your goals</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="floating-card p-6 text-center">
-              <div className="text-sm text-slate-300 mb-1">Today's Progress</div>
-              <div className="text-3xl font-bold gradient-text">{completionRate}%</div>
-              <div className="text-xs text-slate-400">{completedTasks}/{totalTasks} tasks completed</div>
+          {/* Progress Stats */}
+          <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-gray-400 mb-1">Today's Progress</div>
+                <div className="text-3xl font-bold text-white">{completionRate}%</div>
+                <div className="text-sm text-gray-500">{completedTasks}/{totalTasks} tasks completed</div>
+              </div>
+              
+              <div className="text-right">
+                <div className="text-sm text-gray-400 mb-1">Motivational Quote</div>
+                <p className="text-gray-300 text-sm italic max-w-md">
+                  "{currentQuote}"
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Smart Pomodoro AI Coach */}
-          <div className="lg:col-span-1">
-            <SmartPomodoroAICoach 
-              user={user}
-              currentTask={selectedTask}
-              onSessionComplete={() => {
-                console.log('Session completed') // Debug log
-                fetchTasks() // Refresh tasks after session
-              }}
-            />
+          <div className="xl:col-span-1">
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Smart Pomodoro</h2>
+                  <p className="text-gray-400 text-sm">AI-powered focus sessions</p>
+                </div>
+              </div>
+              
+              <SmartPomodoroAICoach 
+                user={user}
+                currentTask={selectedTask}
+                onSessionComplete={() => {
+                  console.log('Session completed')
+                  fetchTasks()
+                }}
+              />
+            </div>
           </div>
 
-          {/* Enhanced Tasks Section */}
-          <div className="lg:col-span-2">
-            <div className="floating-card p-8">
-              <div className="flex items-center justify-between mb-8">
+          {/* Tasks Section */}
+          <div className="xl:col-span-2">
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-gradient-to-r from-green-400/20 to-green-500/20 rounded-xl">
-                    <Target className="w-6 h-6 text-green-400" />
+                  <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                    <Target className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white">Today's Tasks</h2>
-                    <p className="text-slate-400">Focus on what matters most</p>
+                    <h2 className="text-xl font-bold text-white">Today's Tasks</h2>
+                    <p className="text-gray-400 text-sm">Focus on what matters most</p>
                   </div>
                 </div>
                 
                 <button
                   onClick={() => setShowAddTask(true)}
-                  className="flex items-center gap-2 gradient-button px-6 py-3 rounded-xl transition-all group"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
-                  <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" /> 
+                  <Plus className="w-4 h-4" /> 
                   <span>Add Task</span>
                 </button>
               </div>
 
-              {/* Enhanced Add Task Form */}
+              {/* Add Task Form */}
               {showAddTask && (
-                <form onSubmit={addTask} className="mb-8 glass-card p-6 border border-blue-500/30 animate-slide-up">
+                <div className="mb-6 p-6 bg-gray-800 border border-gray-700 rounded-lg">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <Plus className="w-5 h-5 text-blue-400" />
                     Create New Task
                   </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Task Title</label>
+                  <form onSubmit={addTask} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Task Title *</label>
                       <input
                         type="text"
                         placeholder="What do you want to accomplish?"
                         value={newTask.title}
                         onChange={(e) => setNewTask(prev => ({...prev, title: e.target.value}))}
-                        className="form-input w-full"
+                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:bg-gray-600 transition-colors"
                         autoFocus
+                        required
                       />
                     </div>
                     
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Description (Optional)</label>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Description (Optional)</label>
                       <textarea
                         placeholder="Add more details about this task..."
                         value={newTask.description}
                         onChange={(e) => setNewTask(prev => ({...prev, description: e.target.value}))}
-                        className="form-input w-full h-24 resize-none"
+                        className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:bg-gray-600 transition-colors h-20 resize-none"
                       />
                     </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Estimated Time (minutes)</label>
+                        <input
+                          type="number"
+                          min="5"
+                          max="240"
+                          value={newTask.estimated_minutes}
+                          onChange={(e) => setNewTask(prev => ({...prev, estimated_minutes: parseInt(e.target.value) || 25}))}
+                          className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:bg-gray-600 transition-colors"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Priority</label>
+                        <select
+                          value={newTask.priority}
+                          onChange={(e) => setNewTask(prev => ({...prev, priority: e.target.value as 'high' | 'medium' | 'low'}))}
+                          className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:bg-gray-600 transition-colors"
+                        >
+                          <option value="low">Low Priority</option>
+                          <option value="medium">Medium Priority</option>
+                          <option value="high">High Priority</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        type="submit"
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                      >
+                        Create Task
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAddTask(false)
+                          setNewTask({ title: '', description: '', estimated_minutes: 25, priority: 'medium' })
+                        }}
+                        className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
                     
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Priority Level</label>
@@ -367,36 +448,18 @@ export default function TodayPage() {
                   </div>
                   
                   <div className="flex gap-3 mt-6">
-                    <button
-                      type="submit"
-                      className="gradient-button px-6 py-3 rounded-lg flex items-center gap-2"
-                    >
-                      <Check className="w-4 h-4" />
-                      Create Task
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddTask(false)}
-                      className="glass-button px-6 py-3 rounded-lg text-white hover:text-red-300 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* Enhanced Tasks List */}
+              {/* Task List */}
               <div className="space-y-4">
                 {tasks.length === 0 ? (
                   <div className="text-center py-12">
-                    <div className="w-20 h-20 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <BookOpen className="w-10 h-10 text-blue-300" />
+                    <div className="w-20 h-20 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <BookOpen className="w-10 h-10 text-blue-400" />
                     </div>
-                    <div className="text-slate-200 text-xl font-semibold mb-2">No tasks for today yet!</div>
-                    <div className="text-slate-400 mb-6">Create your first task to get started on your productivity journey.</div>
+                    <div className="text-white text-xl font-semibold mb-2">No tasks for today yet!</div>
+                    <div className="text-gray-400 mb-6">Create your first task to get started on your productivity journey.</div>
                     <button
                       onClick={() => setShowAddTask(true)}
-                      className="gradient-button px-6 py-3 rounded-lg inline-flex items-center gap-2"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg inline-flex items-center gap-2 transition-colors"
                     >
                       <Plus className="w-5 h-5" />
                       Add Your First Task
@@ -406,20 +469,19 @@ export default function TodayPage() {
                   tasks.map((task, index) => (
                     <div
                       key={task.id}
-                      className={`glass-card p-6 border transition-all duration-300 hover:subtle-glow animate-slide-up ${
+                      className={`p-6 bg-gray-800 border rounded-lg transition-all duration-300 ${
                         task.completed 
-                          ? 'border-green-400/30 bg-green-500/5' 
-                          : 'border-white/10 hover:border-white/20'
+                          ? 'border-green-600/50 bg-green-600/10' 
+                          : 'border-gray-700 hover:border-gray-600'
                       }`}
-                      style={{animationDelay: `${index * 0.1}s`}}
                     >
                       <div className="flex items-start gap-4">
                         <button
                           onClick={() => toggleTask(task.id, !task.completed)}
-                          className={`mt-1 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all group ${
+                          className={`mt-1 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
                             task.completed 
-                              ? 'bg-green-500 border-green-500 shadow-lg shadow-green-500/50' 
-                              : 'border-slate-400 hover:border-green-400 hover:bg-green-400/10'
+                              ? 'bg-green-600 border-green-600' 
+                              : 'border-gray-400 hover:border-green-500 hover:bg-green-500/10'
                           }`}
                         >
                           {task.completed && <Check className="w-4 h-4 text-white" />}
@@ -428,15 +490,15 @@ export default function TodayPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className={`font-semibold text-lg ${
-                              task.completed ? 'text-green-200 line-through' : 'text-white'
+                              task.completed ? 'text-green-300 line-through' : 'text-white'
                             }`}>
                               {task.title}
                             </h3>
                             
-                            <span className={`px-3 py-1 text-xs rounded-full border font-medium ${
-                              task.priority === 'high' ? 'bg-red-500/20 text-red-200 border-red-400/30' :
-                              task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30' :
-                              'bg-green-500/20 text-green-200 border-green-400/30'
+                            <span className={`px-3 py-1 text-xs rounded-full font-medium ${
+                              task.priority === 'high' ? 'bg-red-600/20 text-red-300 border border-red-600/30' :
+                              task.priority === 'medium' ? 'bg-yellow-600/20 text-yellow-300 border border-yellow-600/30' :
+                              'bg-green-600/20 text-green-300 border border-green-600/30'
                             }`}>
                               {task.priority === 'high' ? '🔴 High' :
                                task.priority === 'medium' ? '🟡 Medium' : '🟢 Low'}
@@ -445,13 +507,13 @@ export default function TodayPage() {
                             {!task.completed && (
                               <button
                                 onClick={() => {
-                                  console.log('Selecting task:', task) // Debug log
+                                  console.log('Selecting task:', task)
                                   setSelectedTask(task)
                                 }}
                                 className={`px-4 py-2 text-sm rounded-lg transition-all ${
                                   selectedTask?.id === task.id
-                                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                                    : 'glass-button text-blue-300 hover:text-blue-200'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-700 text-blue-300 hover:bg-gray-600'
                                 }`}
                               >
                                 {selectedTask?.id === task.id ? '🎯 Selected for Focus' : 'Select for Focus'}
@@ -461,7 +523,7 @@ export default function TodayPage() {
                           
                           {task.description && (
                             <p className={`text-sm mb-3 leading-relaxed ${
-                              task.completed ? 'text-green-300/80' : 'text-slate-300'
+                              task.completed ? 'text-green-300/80' : 'text-gray-300'
                             }`}>
                               {task.description}
                             </p>
@@ -469,7 +531,7 @@ export default function TodayPage() {
                           
                           <div className="flex items-center gap-6 text-sm">
                             <div className={`flex items-center gap-2 ${
-                              task.completed ? 'text-green-400' : 'text-slate-400'
+                              task.completed ? 'text-green-400' : 'text-gray-400'
                             }`}>
                               <Clock className="w-4 h-4" />
                               <span>{task.estimated_minutes} minutes</span>
