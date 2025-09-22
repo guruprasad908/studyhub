@@ -10,6 +10,11 @@ import {
 } from 'lucide-react'
 import WeeklyChart from '../../components/WeeklyChart'
 import TaskPieChart from '../../components/TaskPieChart'
+import PersonalizedContentRecommendations from '../../components/PersonalizedContentRecommendations'
+import AIStudyAnalytics from '../../components/AIStudyAnalytics'
+import AIStudyGroupMatcher from '../../components/AIStudyGroupMatcher'
+import AIFocusOptimizer from '../../components/AIFocusOptimizer'
+import AIAdaptiveLearning from '../../components/AIAdaptiveLearning'
 
 interface RoadmapItem {
   id: string; title: string; target_hours: number; completed_hours: number; created_at: string
@@ -266,6 +271,18 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* AI Study Analytics */}
+          <div className="lg:col-span-1 bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+            <AIStudyAnalytics 
+              user={user} 
+              studyData={{
+                sessions: [], // We'll populate this with actual data
+                tasks: items,
+                weeklySummary: weeklySummary
+              }} 
+            />
+          </div>
+
           {/* Quick Actions */}
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
             <div className="flex items-center gap-2 mb-6">
@@ -294,6 +311,55 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Personalized Content Recommendations */}
+        <div className="mb-8">
+          <PersonalizedContentRecommendations 
+            user={user} 
+            studyData={{
+              sessions: [], // We'll populate this with actual data
+              tasks: items,
+              weeklySummary: weeklySummary
+            }} 
+          />
+        </div>
+
+        {/* AI Study Group Matcher */}
+        <div className="mb-8">
+          <AIStudyGroupMatcher 
+            user={user} 
+            studyData={{
+              sessions: [], // We'll populate this with actual data
+              tasks: items,
+              weeklySummary: weeklySummary
+            }} 
+            allUsersData={[]} // In a real implementation, this would come from the database
+          />
+        </div>
+
+        {/* AI Focus Optimizer */}
+        <div className="mb-8">
+          <AIFocusOptimizer 
+            user={user} 
+            studyData={{
+              sessions: [], // We'll populate this with actual data
+              tasks: items,
+              weeklySummary: weeklySummary
+            }} 
+          />
+        </div>
+
+        {/* AI Adaptive Learning */}
+        <div className="mb-8">
+          <AIAdaptiveLearning 
+            user={user} 
+            studyData={{
+              sessions: [], // We'll populate this with actual data
+              tasks: items,
+              weeklySummary: weeklySummary
+            }} 
+          />
         </div>
 
         {/* Add New Goal */}
