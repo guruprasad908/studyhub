@@ -419,35 +419,7 @@ export default function TodayPage() {
                   </form>
                 </div>
               )}
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Priority Level</label>
-                      <select
-                        value={newTask.priority}
-                        onChange={(e) => setNewTask(prev => ({...prev, priority: e.target.value as any}))}
-                        className="form-input w-full"
-                      >
-                        <option value="low">🟢 Low Priority</option>
-                        <option value="medium">🟡 Medium Priority</option>
-                        <option value="high">🔴 High Priority</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Estimated Time (minutes)</label>
-                      <input
-                        type="number"
-                        placeholder="25"
-                        value={newTask.estimated_minutes}
-                        onChange={(e) => setNewTask(prev => ({...prev, estimated_minutes: parseInt(e.target.value) || 25}))}
-                        className="form-input w-full"
-                        min="5"
-                        max="180"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-3 mt-6">
+              
               {/* Task List */}
               <div className="space-y-4">
                 {tasks.length === 0 ? (

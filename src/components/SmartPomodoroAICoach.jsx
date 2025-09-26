@@ -497,6 +497,26 @@ export default function SmartPomodoroAICoach({
           {getSessionIcon()} {sessionType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
         </div>
         
+        {/* Custom minutes input */}
+        <div className="mt-4 mb-2">
+          <label className="block text-white/80 text-sm mb-2">Session Length (minutes)</label>
+          <input
+            type="number"
+            value={customMinutes}
+            onChange={(e) => {
+              const minutes = parseInt(e.target.value) || 25;
+              setCustomMinutes(minutes);
+              if (!isRunning) {
+                setSecondsLeft(minutes * 60);
+              }
+            }}
+            className="w-24 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-center focus:outline-none focus:ring-2 focus:ring-purple-400"
+            min="1"
+            max="120"
+            disabled={isRunning}
+          />
+        </div>
+        
         {/* Progress bar */}
         <div className="w-full bg-white/20 rounded-full h-2 mt-4">
           <div 

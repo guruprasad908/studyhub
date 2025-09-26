@@ -267,7 +267,7 @@ export default function RoadmapPage() {
                 <input
                   type="number"
                   value={newItem.target_hours}
-                  onChange={(e) => setNewItem({ ...newItem, target_hours: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setNewItem({ ...newItem, target_hours: parseInt(e.target.value) || 20 })}
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400"
                   min="1"
                   max="1000"
